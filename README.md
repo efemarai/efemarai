@@ -1,72 +1,244 @@
-A CLI and SDK for interacting with the [Efemarai ML testing platform](https://efemarai.com).
+
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://uploads-ssl.webflow.com/610aa229ecea935cd9cfb47a/610acaca4091b72c3fd40cf7_efemarai_logo_light-p-500.png#gh-dark-mode-only" width="400">
+    <img src="https://uploads-ssl.webflow.com/610aa229ecea935cd9cfb47a/645b809d1044746ee26f2783_efemarai-logo-dark.png#gh-light-mode-only" width="400"/>
+  </picture>
+  
+<div>&nbsp;</div>
+  <div align="center">
+    <a href="https://efemarai.com">
+      <b><font size="5">Efemarai website</font></b>  
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <b><font size="5">Efemarai platform</font></b>
+    <sup>
+      <a href="https://ci.efemarai.com">
+        <i><font size="4">Use now!</font></i>
+      </a>
+    </sup>
+  </div>
+  <div>&nbsp;</div>
+
+[![PyPI](https://img.shields.io/pypi/v/efemarai)](https://pypi.org/project/efemarai)
+[![license](https://img.shields.io/github/license/efemarai/efemarai.svg)](https://github.com/open-mmlab/mmdetection/blob/main/LICENSE)
+
+ An SDK for interacting with the Efemarai ML [testing platform](https://ci.efemarai.com). Make your R&D model production ready.
+
+    
+[📘Documentation](https://ci.efemarai.com/docs) |
+[🛠️Installation](https://ci.efemarai.com/86b41a59036d7a2bcb53feb925444603/tutorials/getting_started.html#getting-started) |
+[👀Break YOLO](https://breakyolo.efemarai.com/) |
+[🚀Join Community](https://discord.gg/cWQC3rrB) |
+[😞Reporting Issues](https://github.com/efemarai/efemarai/issues/new/choose)
+
+</div>
+
+## Introduction
+
+Efemarai is the easiest to integrate open source platform for testing and validating Computer Vision ML models. It works with any framework and model (PyTorch, TensorFlow, Keras, sklearn, Detectron2, OpenMMLab, YOLO, etc) and in 5 function calls finds examples that break your model.
+
+<details open>
+<summary>Major features</summary>
+
+- **🔮 Operational Domain**
+
+  Finetune how the images should be transformed, such that they cover the variablity the model is exepected to see in the real world. 
+
+- **👨‍💻 Support any Input and Output types**
+
+  Not only do we support tasks such as **classification**, **object detection**, **instance segmentation**, **keypoints detection**, **regression**, but also any combination thereoff, with any type of input - single image, multi-image, video, text, or anything that combines those.
+
+- **📈 High efficiency**
+
+  Don't waste time on randomly augmenting data, with Efemarai you are narrowing down failure modes in your model that are informative and you can fix.
+
+</details>
+
+## Example Works
+
+### Find issues with a COCO detector
+
+Apply advanced transformations, copy, edit, delete any part of the image, reimagine how things should vary in the real world.
+
+![Break a detector](https://uploads-ssl.webflow.com/610aa229ecea935cd9cfb47a/645b8a746fad9c66d237495a_smaller-giraffe.gif)
+
+### Break a face detector
+
+With the `FaceWorks` module, you can perform relighting, face rotation, skin re-toning, etc to find conditions that break your model.
+
+![Break face recognition](https://media.licdn.com/dms/image/C4D22AQFgBefVcNSV7A/feedshare-shrink_800/0/1678370502298?e=1686787200&v=beta&t=VqXHpbQieUkdHesGO5KwHxVvAxGAyB_RrzGUtr-QCZU)
+
+#### Other
+
+If you work in the medical, aerospace and defence, security or ag domain, we provide custom capabilities that are domain specific. For these or other enquiries, drop us [a message](mailto:svet@efemarai.com?subject="Do%20you%20work%20with%20this?").
 
 ## Setup
 
 Install with
-```
+```bash
 pip install -U efemarai
 ```
 then run
+```bash
+efemarai init
 ```
-$ efemarai init
-```
-and following the instructions to connect your account.
+and follow the instructions to connect your account to [https://ci.efemarai.com](https://ci.efemarai.com).
 
 ## Example Usage
 
-### Working with projects
-```
+### Create a Bounding Box Project
+When your project depends on bounding boxes, the uploaded dataset needs to contain the required bounding box information alongside each image as part of a single datapoint.
+
+First we will create a dataset, and later on, a dummy model that returns bounding box information.
+
+#### Create dataset
+A convenient approach for creating a bounding box dataset is by ensuring that the local format is in COCO-compatible format.
+
+```python
 import efemarai as ef
 
-session = ef.Session()
-
-# List all projects
-for project in session.projects:
-    print(project.name)
-
-# Create a new project
-project = session.create_project(
-    name="Aircraft Detection",
-    description="Exmample object detection project",
-    problem_type="ObjectDetection",
+# Create a project
+project = ef.Session().create_project(
+    name="Example Bounding Box Project (COCO)",
+    description="Example project using the COCO dataset format.",
+    exists_ok=True,
 )
 
-# Load an existing one
-project = session.project("Aircraft Detection")
-
-# Create new dataset
 dataset = project.create_dataset(
-    name="Example COCO Dataset",
+    name="Bounding Box dataset",
+    data_url="./data/coco/test",
+    annotations_url="./data/coco/annotations/test_instances.json",
     stage=ef.DatasetStage.Test,
     format=ef.DatasetFormat.COCO,
-    data_url=root,
-    annotations_url=annotations_url,
 )
-
-# Define the path to the model yaml
-local_model_config = ef.Session._load_config_file("model.yaml")
-
-## Create model
-model = project.create_model(**model_config)
-
-# List project models
-for model in project.models:
-    print(model.name)
-
-# List project datasets
-for dataset in project.datasets:
-    print(dataset.name)
 ```
+If your dataset is remote or part of an existing database with custom formats, you can easily upload it to the system by (1) iterating over the dataset and (2) creating datapoints containing the images and required targets. You can find a code example [here](https://ci.efemarai.com/86b41a59036d7a2bcb53feb925444603/tutorials/how_to/project_bounding_box.html#create-dataset).
+
+After wrapping up any processing, you can confirm the status in the UI and explore the inputs and annotations.
+
+#### Create a model
+A model that works with bounding boxes dataset will need to return a list of `ef.BoundingBox` objects that will be matched to the ones stored in the dataset. In a file `dummy_model.py` save the following code:
+
+```python
+import efemarai as ef
+import numpy as np
+
+class DummyModel:
+    """A DummyModel returning a random bbox"""
+
+    def __init__(self, device):
+        self.device = device # Move model to device
+
+    def __call__(self, image):
+        return {
+            "class_id": np.random.randint(0, 3),
+            "bbox": [100, 150, 250, 350],
+            "score": np.random.random(),
+        }
+
+
+def predict_images(datapoints, model, device):
+    outputs = []
+    for datapoint in datapoints:
+        image = datapoint.get_input("image") # This corresponds to the key from the datapoint input creation dict
+
+        image_post_process = image.data / 255 - 0.5 # perform any pre-processing
+
+        output = model(image_post_process)
+
+        # Here again the label can be referenced by name or class
+        # label = ef.AnnotationClass(name=output["class_name"])
+        label = ef.AnnotationClass(id=output["class_id"])
+
+        outputs.append(
+            [
+                ef.BoundingBox(
+                    xyxy=output["bbox"],
+                    confidence=output["score"], # Confidence of detection
+                    ref_field=image, # Say which image this output refers to
+                    label=label,     # And what label it has
+                ),
+            ]
+        )
+    return outputs
+
+
+def load_model(device):
+    model = DummyModel(device)
+    return model
+```
+
+That's the two things you need to define - how to load the model and how to perform an inference on a batch!
+
+#### efemarai.yaml file
+To run the model, you need to have defined the loading and inference capabilities in the efemarai.yaml file. This way we can work with any model from any platfrom or framework.
+
+Here’s the one corresponding to the dummy model.
+
+```yaml
+project:
+  name: "Example Bounding Box Project"
+
+models:
+  - name: Dummy Model
+    description: This is a dummy model to show consuming inputs and outputs
+
+    runtime:
+      image: python:3.10-slim-buster
+      device: "gpu"
+      batch:
+        max_size: 10
+      load:
+        entrypoint: dummy_model:load_model
+        inputs:
+          - name: device
+            value: ${model.runtime.device}
+        output:
+          name: model
+
+      predict:
+        entrypoint: dummy_model:predict_images
+        inputs:
+          - name: datapoints
+            value: ${datapoints}
+          - name: model
+            value: ${model.runtime.load.output.model}
+          - name: device
+            value: ${model.runtime.device}
+        output:
+          name: predictions
+          keys:
+            - bbox
+```
+
+#### Register the model
+To register the model, use the CLI to upload it by going into the root of the file directory, next to the `efemarai.yaml`.
+
+```bash
+ef model create .
+```
+Now you should be able to see the model uploaded and active with this project.
+
+### Create a domain
+
+Let's use the UI to quickly create a domain (`Example`) that you expect your model to operate in.
+
+![](https://storage.googleapis.com/public-efemarai/domain2.gif)
+
+You can find more information in the [docs](https://ci.efemarai.com/86b41a59036d7a2bcb53feb925444603/tutorials/step_by_step/domain.html#create-domain).
 
 ### Working with stress tests
-The best way to create a domain is to use the UI and manually inspect the various transformations and how they affect the images.
-```
+
+Now that you have defined your model, domain and dataset, you are ready to stress test your model and validate how well it works!
+
+```python
 # Create a new stress test
 test = project.create_stress_test(
     name="Test via SDK",
-    model=project.model("COCO instances RCNN-R50"),
-    domain=project.domain("Example Domain"),
-    dataset="Example COCO Dataset", # Just a name also works
+    model=project.model("Dummy Model"),
+    domain=project.domain("Example"),
+    dataset="Example Bounding Box Project (COCO)", # Just a name also works
 )
 
 # Load an existing stress test
@@ -78,18 +250,8 @@ dataset_filepath = test.vulnerabilities_dataset()
 # Check test run state
 print(f"Running: {test.running} Failed: {test.failed} Finished: {test.finished}")
 ```
+
 Models, domains and datasets can be easily created programatically, but
 they require quite a few configuration paramaters to be provided. That's
 why the most convenient way to create a project with multiple models, domains
-and datasets is to put everything into a config file (see e.g.
-`examples/aircraft_project.yaml`) and then just load it with:
-
-```
-result = ef.Session().load("examples/aircraft_project.yaml")
-
-# access the created entities
-project = result["project"]
-models = result["models"]
-domains = result["domains"]
-datasets = result["datasets"]
-```
+and datasets is to put everything into a config file.
