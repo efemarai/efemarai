@@ -1,3 +1,8 @@
+import efemarai.domains
+import efemarai.formats
+import efemarai.hooks
+import efemarai.reports
+import efemarai.spec
 from efemarai.dataset import Dataset, DatasetFormat, DatasetStage
 from efemarai.fields import (
     AnnotationClass,
@@ -17,14 +22,7 @@ from efemarai.fields import (
     Video,
     VideoFrame,
 )
-from efemarai.session import Session
-
 from efemarai.metamorph.search_domain import test_robustness
-
-import efemarai.spec
-import efemarai.formats
-import efemarai.hooks
-import efemarai.reports
-import efemarai.domains
+from efemarai.session import Session
 
 __version__ = "0.3.5"

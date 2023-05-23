@@ -5,7 +5,7 @@ from typing import Generic, Optional, Tuple, Type, TypeVar
 
 import albumentations as A
 
-from efemarai.metamorph.adaptors import apply_albumentation, apply_paste
+from efemarai.metamorph.adaptors import apply_albumentation
 from efemarai.metamorph.vision.operators.custom_operators import (
     GenericNoOp,
     MotionBlurDirectionLimit,

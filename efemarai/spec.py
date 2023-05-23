@@ -1,5 +1,4 @@
 import re
-from functools import reduce
 
 
 class DictLiteral(dict):

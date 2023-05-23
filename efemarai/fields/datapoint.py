@@ -6,12 +6,11 @@ from typing import Union
 
 import ffmpeg
 from bson.objectid import ObjectId
-
-from efemarai.spec import convert
 from efemarai.console import console
 from efemarai.fields.annotation_fields import InstanceField, Polygon
 from efemarai.fields.base_fields import BaseField
 from efemarai.fields.data_fields import Video, VideoFrame
+from efemarai.spec import convert
 
 
 class ModelOutput:

@@ -1,7 +1,5 @@
 import functools
-import os
 from collections import defaultdict
-from contextlib import redirect_stderr, redirect_stdout
 
 import efemarai as ef
 import pandas as pd
