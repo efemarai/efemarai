@@ -18,3 +18,9 @@ python-slugify>=6.1.2
 bson>=0.5.10
 ffmpeg-python>=0.2.0
 opencv-python-headless>=3.4.15.55
+
+
+# local testing
+hyperactive>=4.4.3
+albumentations>=1.3.0
+pandas>=1.5.0

@@ -1,0 +1,132 @@
+domains:
+
+
+- name: ColorStyle
+  transformations:
+
+  - name: ChooseImage
+    operator: ChooseImage
+    axes:
+
+    - name: dataset
+      type: str
+      range: []
+      choices: []
+      fixed: true
+      value: ''
+
+    - name: classes
+      type: list
+      range: []
+      choices: []
+      fixed: true
+      value: []
+    inputs: []
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: BrightnessContrast
+        index: 0
+    position:
+      x: -20
+      "y": 0
+
+  - name: EvaluateSample
+    operator: EvaluateSample
+    axes: []
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: ShiftHSV
+        index: 0
+    outputs: []
+    position:
+      x: 748
+      "y": 0
+
+  - name: BrightnessContrast
+    operator: BrightnessContrast
+    axes:
+
+    - name: brightness
+      type: float
+      range: [-0.1, 0.1]
+      choices: []
+      fixed: false
+
+    - name: contrast
+      type: float
+      range: [-0.1, 0.1]
+      choices: []
+      fixed: false
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: ChooseImage
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: Gamma
+        index: 0
+    position:
+      x: 165
+      "y": 0
+
+  - name: Gamma
+    operator: Gamma
+    axes:
+
+    - name: gamma
+      type: float
+      range: [0.9, 1.1]
+      choices: []
+      fixed: false
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: BrightnessContrast
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: ShiftHSV
+        index: 0
+    position:
+      x: 394
+      "y": 0
+
+  - name: ShiftHSV
+    operator: ShiftHSV
+    axes:
+
+    - name: hue
+      type: int
+      range: [-15, 15]
+      choices: []
+      fixed: false
+
+    - name: sat
+      type: int
+      range: [-15, 15]
+      choices: []
+      fixed: false
+
+    - name: val
+      type: int
+      range: [-15, 15]
+      choices: []
+      fixed: false
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: Gamma
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: EvaluateSample
+        index: 0
+    position:
+      x: 567
+      "y": 0

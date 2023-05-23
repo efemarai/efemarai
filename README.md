@@ -21,15 +21,15 @@
   <div>&nbsp;</div>
 
 [![PyPI](https://img.shields.io/pypi/v/efemarai)](https://pypi.org/project/efemarai)
-[![license](https://img.shields.io/github/license/efemarai/efemarai.svg)](https://github.com/open-mmlab/mmdetection/blob/main/LICENSE)
+[![license](https://img.shields.io/github/license/efemarai/efemarai.svg)](https://github.com/efemarai/efemarai/blob/main/LICENSE)
 
  An SDK for interacting with the Efemarai ML [testing platform](https://ci.efemarai.com). Make your R&D model production ready.
 
     
 [📘Documentation](https://ci.efemarai.com/docs) |
-[🛠️Installation](https://ci.efemarai.com/86b41a59036d7a2bcb53feb925444603/tutorials/getting_started.html#getting-started) |
+[🛠️Installation](https://ci.efemarai.com/docs/tutorials/getting_started.html#getting-started) |
 [👀Break YOLO](https://breakyolo.efemarai.com/) |
-[🚀Join Community](https://discord.gg/cWQC3rrB) |
+[🚀Join Community](https://discord.gg/zXsVgSuemB) |
 [😞Reporting Issues](https://github.com/efemarai/efemarai/issues/new/choose)
 
 </div>
@@ -113,7 +113,7 @@ dataset = project.create_dataset(
     format=ef.DatasetFormat.COCO,
 )
 ```
-If your dataset is remote or part of an existing database with custom formats, you can easily upload it to the system by (1) iterating over the dataset and (2) creating datapoints containing the images and required targets. You can find a code example [here](https://ci.efemarai.com/86b41a59036d7a2bcb53feb925444603/tutorials/how_to/project_bounding_box.html#create-dataset).
+If your dataset is remote or part of an existing database with custom formats, you can easily upload it to the system by (1) iterating over the dataset and (2) creating datapoints containing the images and required targets. You can find a code example [here](https://ci.efemarai.com/docs/tutorials/how_to/project_bounding_box.html#create-dataset).
 
 After wrapping up any processing, you can confirm the status in the UI and explore the inputs and annotations.
 
@@ -226,7 +226,7 @@ Let's use the UI to quickly create a domain (`Example`) that you expect your mod
 
 ![](https://storage.googleapis.com/public-efemarai/domain2.gif)
 
-You can find more information in the [docs](https://ci.efemarai.com/86b41a59036d7a2bcb53feb925444603/tutorials/step_by_step/domain.html#create-domain).
+You can find more information in the [docs](https://ci.efemarai.com/docs/tutorials/step_by_step/domain.html#create-domain).
 
 ### Working with stress tests
 

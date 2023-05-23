@@ -1,0 +1,222 @@
+domains:
+
+
+- name: Test
+  transformations:
+
+  - name: ChooseImage
+    operator: ChooseImage
+    axes:
+
+    - name: dataset
+      type: str
+      range: []
+      choices: []
+      fixed: true
+      value: ''
+
+    - name: classes
+      type: list
+      range: []
+      choices: []
+      fixed: true
+      value: []
+    inputs: []
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: HorizontalFlip
+        index: 0
+    position:
+      x: -262
+      "y": -37
+
+  - name: Affine
+    operator: Affine
+    axes:
+
+    - name: affine_scale
+      type: float
+      range: [0.9, 1.1]
+      choices: []
+      fixed: false
+      value: 1
+
+    - name: shear_x
+      type: float
+      range: [-10, 10]
+      choices: []
+      fixed: true
+      value: 0
+
+    - name: shear_y
+      type: float
+      range: [-40, 40]
+      choices: []
+      fixed: true
+      value: 0
+
+    - name: affine_rotate
+      type: float
+      range: [-10, 10]
+      choices: []
+      fixed: false
+      value: 0
+
+    - name: translate_x
+      type: float
+      range: []
+      choices: []
+      fixed: true
+      value: 0
+
+    - name: translate_y
+      type: float
+      range: []
+      choices: []
+      fixed: true
+      value: 0
+
+    - name: interpolation
+      type: int
+      range: []
+      choices: []
+      fixed: true
+      value: 1
+
+    - name: border_mode
+      type: int
+      range: []
+      choices: []
+      fixed: true
+      value: 1
+
+    - name: infill_color
+      type: Color
+      range: []
+      choices: []
+      fixed: true
+      value: [0, 0, 0]
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: HorizontalFlip
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: Perspective
+        index: 0
+    position:
+      x: 127
+      "y": -9
+
+  - name: EvaluateSample
+    operator: EvaluateSample
+    axes: []
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: OpticalDistortion
+        index: 0
+    outputs: []
+    position:
+      x: 737
+      "y": -7
+
+  - name: Perspective
+    operator: Perspective
+    axes:
+
+    - name: perspective_scale
+      type: float
+      range: [0, 0.1]
+      choices: []
+      fixed: false
+
+    - name: border_mode
+      type: int
+      range: []
+      choices: [0, 1, 2, 3, 4]
+      fixed: true
+      value: 0
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: Affine
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: OpticalDistortion
+        index: 0
+    position:
+      x: 298
+      "y": -7
+
+  - name: OpticalDistortion
+    operator: OpticalDistortion
+    axes:
+
+    - name: distort_limit
+      type: float
+      range: [-0.1, 0.1]
+      choices: []
+      fixed: false
+
+    - name: distort_shift_limit
+      type: float
+      range: [-10, 10]
+      choices: []
+      fixed: true
+      value: 1
+
+    - name: border_mode
+      type: int
+      range: []
+      choices: [0, 1, 2, 3, 4]
+      fixed: true
+      value: 4
+
+    - name: interpolation
+      type: int
+      range: []
+      choices: [0, 1, 2, 3, 4]
+      fixed: true
+      value: 1
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: Perspective
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: EvaluateSample
+        index: 0
+    position:
+      x: 506
+      "y": -4
+
+  - name: HorizontalFlip
+    operator: HorizontalFlip
+    axes:
+
+    - name: hflip
+      type: bool
+      range: []
+      choices: [false, true]
+      fixed: false
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: ChooseImage
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: Affine
+        index: 0
+    position:
+      x: -76
+      "y": -22

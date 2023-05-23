@@ -8,6 +8,7 @@ from efemarai.fields import (
     InstanceMask,
     Keypoint,
     Mask,
+    ModelOutput,
     Polygon,
     Skeleton,
     Tag,
@@ -17,5 +18,13 @@ from efemarai.fields import (
     VideoFrame,
 )
 from efemarai.session import Session
+
+from efemarai.metamorph.search_domain import test_robustness
+
+import efemarai.spec
+import efemarai.formats
+import efemarai.hooks
+import efemarai.reports
+import efemarai.domains
 
 __version__ = "0.3.5"
