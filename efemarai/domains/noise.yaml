@@ -1,0 +1,164 @@
+domains:
+
+
+- name: Noise
+  transformations:
+
+  - name: ChooseImage
+    operator: ChooseImage
+    axes:
+
+    - name: dataset
+      type: str
+      range: []
+      choices: []
+      fixed: true
+      value: ''
+
+    - name: classes
+      type: list
+      range: []
+      choices: []
+      fixed: true
+      value: []
+    inputs: []
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: ISONoise
+        index: 0
+    position:
+      x: -340
+      "y": 0
+
+  - name: EvaluateSample
+    operator: EvaluateSample
+    axes: []
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: Sharpen
+        index: 0
+    outputs: []
+    position:
+      x: 660
+      "y": 0
+
+  - name: ISONoise
+    operator: ISONoise
+    axes:
+
+    - name: iso_color_shift
+      type: float
+      range: [0, 0.6]
+      choices: []
+      fixed: false
+
+    - name: iso_intensity
+      type: float
+      range: [0, 1]
+      choices: []
+      fixed: true
+      value: 0.5
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: ChooseImage
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: MotionBlur
+        index: 0
+    position:
+      x: -150
+      "y": 0
+
+  - name: MotionBlur
+    operator: MotionBlur
+    axes:
+
+    - name: motion_blur
+      type: int
+      range: [0, 10]
+      choices: []
+      fixed: false
+
+    - name: motion_direction
+      type: float
+      range: [0, 1]
+      choices: []
+      fixed: false
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: ISONoise
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: ImageCompression
+        index: 0
+    position:
+      x: 25
+      "y": 0
+
+  - name: ImageCompression
+    operator: ImageCompression
+    axes:
+
+    - name: image_quality
+      type: int
+      range: [40, 100]
+      choices: []
+      fixed: false
+
+    - name: compression_type
+      type: str
+      range: []
+      choices: [jpg, webp]
+      fixed: true
+      value: jpg
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: MotionBlur
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: Sharpen
+        index: 0
+    position:
+      x: 215
+      "y": 0
+
+  - name: Sharpen
+    operator: Sharpen
+    axes:
+
+    - name: sharpen_alpha
+      type: float
+      range: [0, 0.8]
+      choices: []
+      fixed: false
+
+    - name: sharpen_lightness
+      type: float
+      range: [0, 1]
+      choices: []
+      fixed: true
+      value: 1
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: ImageCompression
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: EvaluateSample
+        index: 0
+    position:
+      x: 465
+      "y": 0

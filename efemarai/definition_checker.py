@@ -26,9 +26,10 @@ class DefinitionChecker(BaseChecker):
     def is_path_remote(path):
         return urllib.parse.urlparse(path).scheme in ("http", "https")
 
-    def load_definition(self, filename):
+    @staticmethod
+    def load_definition(filename):
         if not os.path.isfile(filename):
-            self._error(f"File '{filename}' does not exist")
+            BaseChecker._error(f"File '{filename}' does not exist")
 
         with open(filename) as f:
             contents = f.read()
@@ -39,11 +40,13 @@ class DefinitionChecker(BaseChecker):
         )
 
         unknown_environment_variables = list(
-            set(unknown_environment_variables) - self._allowed_vars
+            set(unknown_environment_variables) - DefinitionChecker._allowed_vars
         )
         if unknown_environment_variables:
             for match in unknown_environment_variables:
-                self._error(f"Unknown environment variable '{match}' in '{filename}'")
+                BaseChecker._error(
+                    f"Unknown environment variable '{match}' in '{filename}'"
+                )
 
         return yaml.safe_load(contents)
 

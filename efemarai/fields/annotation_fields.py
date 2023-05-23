@@ -287,6 +287,40 @@ class InstanceField(BaseField):
 
 
 class BoundingBox(InstanceField):
+    XYWH_ABSOLUTE = 0
+    XYXY_ABSOLUTE = 1
+
+    @staticmethod
+    def convert(box, source_format=None, target_format=None):
+        if source_format is None:
+            source_format = BoundingBox.XYXY_ABSOLUTE
+
+        if target_format is None:
+            target_format = BoundingBox.XYXY_ABSOLUTE
+
+        if source_format == target_format:
+            return box
+
+        if source_format != BoundingBox.XYXY_ABSOLUTE:
+            box = BoundingBox._convert_to_xyxy_absolute(box, source_format)
+
+        if target_format != BoundingBox.XYXY_ABSOLUTE:
+            box = BoundingBox._convert_from_xyxy_absolute(box, target_format)
+
+        return box
+
+    @staticmethod
+    def _convert_to_xyxy_absolute(box, source_format):
+        if source_format == BoundingBox.XYWH_ABSOLUTE:
+            x, y, w, h, *rest = box
+            return x, y, x + w - 1, y + h - 1, *rest
+
+    @staticmethod
+    def _convert_from_xyxy_absolute(box, target_format):
+        if target_format == BoundingBox.XYWH_ABSOLUTE:
+            x1, y1, x2, y2, *rest = box
+            return x1, y2, x2 - x1 + 1, y2 - y1 + 1, *rest
+
     """
     Represents a bounding box annotation.
 

@@ -7,13 +7,64 @@ from typing import Union
 import ffmpeg
 from bson.objectid import ObjectId
 
+from efemarai.spec import convert
 from efemarai.console import console
 from efemarai.fields.annotation_fields import InstanceField, Polygon
 from efemarai.fields.base_fields import BaseField
 from efemarai.fields.data_fields import Video, VideoFrame
 
 
+class ModelOutput:
+    @staticmethod
+    def create_from(spec, datapoint, data):
+        outputs = convert(spec, data)
+
+        for output in outputs:
+            if output.ref_field is not None:
+                continue
+
+            output.ref_field = [input.id for input in datapoint.inputs]
+
+        return ModelOutput(outputs)
+
+    def __init__(self, outputs):
+        self.outputs = outputs
+
+    def __len__(self):
+        return len(self.outputs)
+
+
 class Datapoint:
+    @staticmethod
+    def create_from(spec, data):
+        datapoint = Datapoint(dataset=None)
+
+        inputs, targets = convert(spec, data)
+
+        if not isinstance(inputs, list):
+            inputs = [inputs]
+
+        if not isinstance(targets, list):
+            targets = [targets]
+
+        for target in targets:
+            if target.ref_field is not None:
+                continue
+
+            target.ref_field = [input.id for input in inputs]
+
+        datapoint.inputs.extend(inputs)
+        datapoint.targets.extend(targets)
+
+        return datapoint
+
+    @staticmethod
+    def create_targets_from(spec, data):
+        targets = convert(spec, data)
+        if not isinstance(targets, list):
+            targets = [targets]
+        return targets
+
     """
     Used to represent the information about a single piece of data, which is
     to be passed to the model. The datapoint holds the data in `inputs` (like
@@ -42,6 +93,13 @@ class Datapoint:
         res += f"\n  targets={self.targets}"
         res += "\n)"
         return res
+
+    def __getattr__(self, name):
+        def find_in(fields):
+            res = [field for field in fields if field.key_name == name]
+            return res[0] if res else None
+
+        return find_in(self.inputs) or find_in(self.targets)
 
     @staticmethod
     def sanitize_format(data):

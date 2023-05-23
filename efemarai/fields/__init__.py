@@ -28,7 +28,7 @@ from efemarai.fields.data_fields import (
     VideoFrame,
     create_polygons_from_mask,
 )
-from efemarai.fields.datapoint import Datapoint
+from efemarai.fields.datapoint import Datapoint, ModelOutput
 
 SDK_CLASS_STRUCTURE = dict(inspect.getmembers(sys.modules[__name__], inspect.isclass))
 

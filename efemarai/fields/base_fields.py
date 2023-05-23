@@ -65,6 +65,8 @@ class BaseField:
     ):
 
         self.id = id if id is not None else ObjectId()
+        self._requires_loss = True
+        self._requires_transform = True
         self.description = description
         self.key_name = key_name
         self.confidence = confidence
