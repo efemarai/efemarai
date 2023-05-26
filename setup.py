@@ -44,6 +44,7 @@ setup(
     url="https://www.efemarai.com/",
     license="MIT license",
     packages=find_packages(),
+    package_data={"efemarai.domains": ["*.yaml"]},
     entry_points={
         "console_scripts": ["efemarai = efemarai.cli:main", "ef = efemarai.cli:main"]
     },

@@ -65,8 +65,6 @@ class BaseField:
     ):
 
         self.id = id if id is not None else ObjectId()
-        self._requires_loss = True
-        self._requires_transform = True
         self.description = description
         self.key_name = key_name
         self.confidence = confidence
@@ -96,6 +94,14 @@ class BaseField:
 
     def _serialize(self):
         return sdk_serialize(self)
+
+    @property
+    def _requires_loss(self):
+        return self.user_attributes.get("require_loss", True)
+
+    @property
+    def _requires_transform(self):
+        return self.user_attributes.get("require_transform", True)
 
     def __repr__(self):
         res = f"{self.__module__}.{self.__class__.__name__}("

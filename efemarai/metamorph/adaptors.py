@@ -5,7 +5,7 @@ from functools import wraps
 import albumentations as A
 import numpy as np
 
-from efemarai import BoundingBox, Image, Keypoint, Polygon, Skeleton
+from efemarai.fields import BoundingBox, Image, Keypoint, Polygon, Skeleton
 
 
 def apply_albumentation(filter_instances=True):
