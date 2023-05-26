@@ -33,7 +33,7 @@ def main():
     report = ef.test_robustness(
         dataset=dataset,
         model=lambda x: model(x.cuda().unsqueeze(0))[0],
-        domain=ef.domains.GeometricVariability,
+        domain=ef.domains.ColorVariability,
         dataset_format=ef.formats.COCO_DATASET,
         output_format=ef.formats.TORCHVISION_DETECTION,
         transform=weights.transforms(),

@@ -15,10 +15,13 @@ from efemarai.spec import convert
 
 class ModelOutput:
     @staticmethod
-    def create_from(spec, datapoint, data):
+    def create_from(spec, datapoint, data, remap_class_ids=None):
         outputs = convert(spec, data)
 
         for output in outputs:
+            if remap_class_ids and hasattr(output, "label"):
+                output.label.id = remap_class_ids[output.label.id]
+
             if output.ref_field is not None:
                 continue
 

@@ -36,3 +36,15 @@ TORCHVISION_DETECTION = {
         )
     ]
 }
+
+ULTRALYTICS_DETECTION = {
+    ".boxes": {
+        call(zip, ".xyxy", ".cls", ".conf"): [
+            create(
+                BoundingBox,
+                xyxy={0: lambda x: x.tolist()},
+                label=create(AnnotationClass, id="[1]", confidence="[2]"),
+            )
+        ]
+    }
+}
