@@ -25,4 +25,4 @@ from efemarai.fields import (
 from efemarai.metamorph.search_domain import test_robustness
 from efemarai.session import Session
 
-__version__ = "0.3.5"
+__version__ = "0.3.6"
