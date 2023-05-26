@@ -28,6 +28,7 @@ def test_robustness(
     class_names=None,
     dataset_index_to_id=None,
     num_search_steps=100,
+    remap_class_ids=None,
 ):
     """
     Stress test a model and estimate its vulnerability w.r.t. an operational domain.
@@ -89,6 +90,9 @@ def test_robustness(
         num_search_steps: int=100,
             Number of iterations searching for failures within the operation domain.
 
+        remap_class_ids: dict[int, int]=None,
+            Dictionary with model class_ids to remap to dataset class ids.
+
     Returns:
 
         An `efemarai.RobsutnessTestReport` containing vulnerability per domain axis
@@ -101,7 +105,7 @@ def test_robustness(
         input_format = ef.formats.DEFAULT_INPUT_FORMAT
 
     if class_ids is None:
-        class_ids = _extract_class_ids(dataset, class_names)
+        class_ids = _extract_class_ids(dataset, class_names, dataset_format)
 
     class_weights = {class_id: 1 / len(class_ids) for class_id in class_ids}
     field_weights = defaultdict(lambda: 1)
@@ -122,6 +126,7 @@ def test_robustness(
         output_format=output_format,
         hooks=hooks,
         num_search_steps=num_search_steps,
+        remap_class_ids=remap_class_ids,
     )
 
     with Progress(transient=True) as progress:
@@ -142,7 +147,9 @@ def test_robustness(
 
             output = model(input)
 
-            output = ef.ModelOutput.create_from(output_format, datapoint, output)
+            output = ef.ModelOutput.create_from(
+                output_format, datapoint, output, remap_class_ids=remap_class_ids
+            )
 
             baseline_loss = loss_fn(datapoint, output)
             baseline_score = aggregate_loss(baseline_loss)
@@ -169,7 +176,7 @@ def test_robustness(
     return report
 
 
-def _extract_class_ids(dataset, class_names):
+def _extract_class_ids(dataset, class_names, dataset_format):
     if class_names is not None:
         return list(range(len(class_names)))
 
@@ -199,6 +206,7 @@ def _get_search_args(
     output_format,
     hooks,
     num_search_steps,
+    remap_class_ids=None,
     baseline_datapoint=None,
     baseline_loss=None,
     baseline_score=None,
@@ -214,6 +222,7 @@ def _get_search_args(
         "output_format": output_format,
         "hooks": hooks,
         "num_search_steps": num_search_steps,
+        "remap_class_ids": remap_class_ids,
         "baseline_datapoint": baseline_datapoint,
         "baseline_loss": baseline_loss,
         "baseline_score": baseline_score,
@@ -253,6 +262,7 @@ def _vulnerability_objective(opt):
     model = args["model"]
     domain = opt.pass_through["domain"]
     loss_fn = args["loss_fn"]
+    remap_class_ids = args["remap_class_ids"]
     baseline_datapoint = opt.pass_through["baseline_datapoint"]
     baseline_loss = args["baseline_loss"]
 
@@ -274,10 +284,11 @@ def _vulnerability_objective(opt):
         input, target = transforms(input, target)
 
     output = model(input)
-    output = ef.ModelOutput.create_from(output_format, datapoint, output)
+    output = ef.ModelOutput.create_from(
+        output_format, datapoint, output, remap_class_ids=remap_class_ids
+    )
 
     sample_loss = loss_fn(datapoint, output)
-    sample_score = aggregate_loss(sample_loss)
 
     vulnerability = aggregate_loss(subtract_losses(sample_loss, baseline_loss))
 
