@@ -63,6 +63,8 @@ class BaseField:
         confidence: float = None,
         user_attributes: Dict[str, object] = None,
     ):
+        if user_attributes is None:
+            user_attributes = {}
 
         self.id = id if id is not None else ObjectId()
         self.description = description
