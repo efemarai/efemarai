@@ -289,6 +289,7 @@ class InstanceField(BaseField):
 class BoundingBox(InstanceField):
     XYWH_ABSOLUTE = 0
     XYXY_ABSOLUTE = 1
+    CENTERWH_ABSOLUTE = 2
 
     @staticmethod
     def convert(box, source_format=None, target_format=None):
@@ -314,6 +315,9 @@ class BoundingBox(InstanceField):
         if source_format == BoundingBox.XYWH_ABSOLUTE:
             x, y, w, h, *rest = box
             return x, y, x + w - 1, y + h - 1, *rest
+        if source_format == BoundingBox.CENTERWH_ABSOLUTE:
+            x, y, w, h, *rest = box
+            return x - w / 2, y - h / 2, x + w / 2, y + h / 2, *rest
 
     @staticmethod
     def _convert_from_xyxy_absolute(box, target_format):
@@ -685,6 +689,5 @@ class Skeleton(InstanceField):
 
 class PolarVector:
     def __init__(self, angle: float, length: float):
-
         self.angle = angle
         self.length = length

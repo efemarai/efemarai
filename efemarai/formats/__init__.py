@@ -48,3 +48,34 @@ ULTRALYTICS_DETECTION = {
         ]
     }
 }
+
+DEFAULT_INPUT_NP_FORMAT = {".image": {".data": np.array}}
+
+SUPERVISION_TARGET = {
+    call(zip, ".xyxy", ".class_id"): [
+        create(
+            BoundingBox,
+            xyxy={0: lambda x: x},
+            label=create(
+                AnnotationClass,
+                id={1: lambda x: x},
+            ),
+        )
+    ]
+}
+
+SUPERVISION_DETECTION = (COCO_INPUT, SUPERVISION_TARGET)
+
+ROBOFLOW_DETECTION = {
+    "predictions": [
+        create(
+            BoundingBox,
+            xyxy=call(
+                BoundingBox.convert,
+                box=lambda x: (x["x"], x["y"], x["width"], x["height"]),
+                source_format=BoundingBox.CENTERWH_ABSOLUTE,
+            ),
+            label=create(AnnotationClass, id="class", confidence="confidence"),
+        ),
+    ]
+}
