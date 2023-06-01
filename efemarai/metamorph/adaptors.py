@@ -5,7 +5,40 @@ from functools import wraps
 import albumentations as A
 import numpy as np
 
-from efemarai.fields import BoundingBox, Image, Keypoint, Polygon, Skeleton
+from efemarai.fields import BoundingBox, Image, Keypoint, Polygon, Skeleton, Text
+
+
+def apply_nlpaug():
+    def decorator(create_operator):
+        supported_data_types = {Text}
+        supported_annotation_types = {Text}
+
+        @wraps(create_operator)
+        def wrapper(*args, **kwargs):
+            def apply_operator(datapoint):
+                # Specify how a single field is to be transformed
+                def transform(field, annotations, field_metadata=None):
+                    operator = create_operator(*args, **kwargs)
+                    transformed_field = deepcopy(field)
+                    output = operator(transformed_field.text)
+                    transformed_field.text = output[0]
+
+                    return transformed_field, annotations
+
+                result = transform_datapoint(
+                    transform,
+                    datapoint,
+                    supported_data_types,
+                    supported_annotation_types,
+                )
+
+                return (result,)
+
+            return apply_operator
+
+        return wrapper
+
+    return decorator
 
 
 def apply_albumentation(filter_instances=True):
@@ -16,7 +49,6 @@ def apply_albumentation(filter_instances=True):
         @wraps(create_operator)
         def wrapper(*args, **kwargs):
             def apply_operator(datapoint):
-
                 # Specify how a single field is to be transformed
                 def transform(field, annotations, field_metadata=None):
                     operator = create_operator(*args, **kwargs)
@@ -55,7 +87,6 @@ def apply_paste():
         @wraps(create_operator)
         def wrapper(*args, **kwargs):
             def apply_operator(asset, datapoint):
-
                 # Specify how a single field is to be transformed
                 def transform(field, annotations, field_metadata):
                     paste = create_operator(*args, **kwargs)

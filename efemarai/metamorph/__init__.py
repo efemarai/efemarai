@@ -1,1 +1,1 @@
-from efemarai.metamorph.vision.vision_metamorphs import Box, Color
+from efemarai.metamorph.base_metamorphs import Box, Color

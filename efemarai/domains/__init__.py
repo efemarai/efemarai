@@ -16,3 +16,4 @@ def load(filename, dataset=None):
 GeometricVariability = load(os.path.dirname(__file__) + "/geometric.yaml")
 ColorVariability = load(os.path.dirname(__file__) + "/color.yaml")
 NoiseVariability = load(os.path.dirname(__file__) + "/noise.yaml")
+TextVariability = load(os.path.dirname(__file__) + "/text.yaml")

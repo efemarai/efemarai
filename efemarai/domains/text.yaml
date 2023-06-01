@@ -1,0 +1,124 @@
+domains:
+
+
+- name: Text
+  transformations:
+
+  - name: ChooseImage
+    operator: ChooseImage
+    axes:
+
+    - name: dataset
+      type: str
+      range: []
+      choices: []
+      fixed: true
+      value: ''
+
+    - name: classes
+      type: list
+      range: []
+      choices: []
+      fixed: true
+      value: []
+    inputs: []
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: WordSynonym
+        index: 0
+    position:
+      x: -126
+      "y": -12
+
+  - name: EvaluateSample
+    operator: EvaluateSample
+    axes: []
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: CharKeyboard
+        index: 0
+    outputs: []
+    position:
+      x: 772
+      "y": -22
+
+  - name: WordSynonym
+    operator: WordSynonym
+    axes:
+    
+    - name: word_synonym_p
+      type: float
+      range: [0, 0.15]
+      choices: []
+      fixed: false
+      value: 0.3
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: ChooseImage
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: WordSpelling
+        index: 0
+    position:
+      x: 82
+      "y": -14
+
+  - name: WordSpelling
+    operator: WordSpelling
+    axes:
+
+    - name: word_spelling_p
+      type: float
+      range: [0, 0.15]
+      choices: []
+      fixed: false
+      value: 0.3
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: WordSynonym
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: CharKeyboard
+        index: 0
+    position:
+      x: 295
+      "y": -23
+
+  - name: CharKeyboard
+    operator: CharKeyboard
+    axes:
+
+    - name: char_keyboard_char_p
+      type: float
+      range: [0, 0.1]
+      choices: []
+      fixed: false
+      value: 0.3
+
+    - name: char_keyboard_word_p
+      type: float
+      range: [0, 0.1]
+      choices: []
+      fixed: false
+      value: 0.3
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: WordSpelling
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: EvaluateSample
+        index: 0
+    position:
+      x: 509
+      "y": -29

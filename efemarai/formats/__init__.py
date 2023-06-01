@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image as PIL_Image
 
-from efemarai.fields import AnnotationClass, BoundingBox, Image
+from efemarai.fields import AnnotationClass, BoundingBox, Image, Text
 from efemarai.spec import call, create
 
 
@@ -24,6 +24,16 @@ COCO_TARGET = [
 ]
 
 COCO_DATASET = (COCO_INPUT, COCO_TARGET)
+
+TEXT_EQA_INPUT = create(
+    lambda *args: list(args),
+    create(Text, text="context", key_name="'context'"),
+    create(Text, text="question", key_name="'question'"),
+)
+
+TEXT_EQA_OUTPUT = create(Text, text="answer", key_name="'answer'")
+
+TEXT_EQA_DATASET = (TEXT_EQA_INPUT, TEXT_EQA_OUTPUT)
 
 DEFAULT_INPUT_FORMAT = {".image": {".data": PIL_Image.fromarray}}
 
