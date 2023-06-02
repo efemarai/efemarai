@@ -16,7 +16,6 @@ def apply_albumentation(filter_instances=True):
         @wraps(create_operator)
         def wrapper(*args, **kwargs):
             def apply_operator(datapoint):
-
                 # Specify how a single field is to be transformed
                 def transform(field, annotations, field_metadata=None):
                     operator = create_operator(*args, **kwargs)
@@ -55,7 +54,6 @@ def apply_paste():
         @wraps(create_operator)
         def wrapper(*args, **kwargs):
             def apply_operator(asset, datapoint):
-
                 # Specify how a single field is to be transformed
                 def transform(field, annotations, field_metadata):
                     paste = create_operator(*args, **kwargs)
@@ -424,6 +422,7 @@ def prepare_polygon_fields(image, targets):
 
     for mask, field in zip(targets["masks"], targets["polygon_fields"]):
         polygon = Polygon(
+            vertices=[],
             ref_field=[image.id],
             instance_id=field.instance_id,
             label=field.label,

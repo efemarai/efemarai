@@ -1,4 +1,4 @@
-from efemarai.fields import BoundingBox
+from efemarai.fields import BoundingBox, Polygon, InstanceMask
 
 
 def show_sample(
@@ -28,6 +28,30 @@ def show_sample(
     for box in boxes:
         x1, y1, x2, y2 = box.xyxy
         cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (255, 255, 255), 1)
+
+    polygons = [
+        field
+        for field in model_output.outputs
+        if isinstance(field, (Polygon, InstanceMask))
+    ]
+    for poly in polygons:
+        vertices = None
+
+        if isinstance(poly, Polygon):
+            vertices = poly.vertices
+
+        if isinstance(poly, InstanceMask):
+            vertices = poly.to_polygon().vertices
+
+        if vertices:
+            for vertice in vertices:
+                cv2.polylines(
+                    image,
+                    np.array(vertice)[None, :, :].astype(int),
+                    True,
+                    (255, 255, 255),
+                    1,
+                )
 
     cv2.imshow(f"Generated Image", image)
     cv2.waitKey(1)
