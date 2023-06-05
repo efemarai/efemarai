@@ -26,6 +26,8 @@ class Session:
     All commands use the active session to communicate and perform the needed actions.
     """
 
+    DEFAULT_URL = "https://ci.efemarai.com"
+
     @staticmethod
     def _fetch_token(url, username, password):
         try:
@@ -66,7 +68,7 @@ class Session:
         password = Prompt.ask("Password", password=True)
 
         while True:
-            url = Prompt.ask("Platform URL", default="https://ci.efemarai.com")
+            url = Prompt.ask("Platform URL", default=Session.DEFAULT_URL)
 
             if not re.match(r"^https?://", url):
                 url = "https://" + url
@@ -269,39 +271,53 @@ class Session:
         )
         return project
 
-    def _get(self, endpoint, json=None, params=None, project_id=None):
-        return self._make_request(requests.get, endpoint, json, params, project_id)
+    def _get(self, endpoint, json=None, params=None, project_id=None, verbose=True):
+        return self._make_request(
+            requests.get, endpoint, json, params, project_id, verbose
+        )
 
-    def _post(self, endpoint, json=None, params=None, project_id=None):
-        return self._make_request(requests.post, endpoint, json, params, project_id)
+    def _post(self, endpoint, json=None, params=None, project_id=None, verbose=True):
+        return self._make_request(
+            requests.post, endpoint, json, params, project_id, verbose
+        )
 
-    def _put(self, endpoint, json=None, params=None, project_id=None):
-        return self._make_request(requests.put, endpoint, json, params, project_id)
+    def _put(self, endpoint, json=None, params=None, project_id=None, verbose=True):
+        return self._make_request(
+            requests.put, endpoint, json, params, project_id, verbose
+        )
 
-    def _delete(self, endpoint, json=None, params=None, project_id=None):
-        return self._make_request(requests.delete, endpoint, json, params, project_id)
+    def _delete(self, endpoint, json=None, params=None, project_id=None, verbose=True):
+        return self._make_request(
+            requests.delete, endpoint, json, params, project_id, verbose
+        )
 
-    def _make_request(self, method, endpoint, json=None, params=None, project_id=None):
+    def _make_request(
+        self, method, endpoint, json=None, params=None, project_id=None, verbose=True
+    ):
         url = self.url
         if not url.endswith("/") and not endpoint.startswith("/"):
             url += "/"
         url += endpoint
 
         try:
+            headers = {}
+            if self.token is not None and self.token != "":
+                headers.update({"Authorization": f"Token {self.token}"})
+            if project_id is not None:
+                headers.update({"ProjectId": project_id})
+
             response = method(
                 url,
-                headers={
-                    "Authorization": f"Token {self.token}",
-                    "ProjectId": project_id,
-                },
+                headers=headers,
                 json=json,
                 params=params,
             )
         except requests.exceptions.ConnectionError as e:
-            console.print(
-                f":poop: It looks you cannot reach us at {self.url}. If you think you should, send us an email.",
-                style="RED",
-            )
+            if verbose:
+                console.print(
+                    f":poop: It looks you cannot reach us at {self.url}. If you think you should, send us an email.",
+                    style="RED",
+                )
             raise e
 
         if not response.ok:
@@ -309,11 +325,11 @@ class Session:
                 message = response.json()["message"]
             except Exception:
                 message = response.text
-
-            console.print(
-                f":poop: [{response.status_code} {response.reason}] {message}",
-                style="RED",
-            )
+            if verbose:
+                console.print(
+                    f":poop: [{response.status_code} {response.reason}] {message}",
+                    style="RED",
+                )
 
             response.raise_for_status()
 

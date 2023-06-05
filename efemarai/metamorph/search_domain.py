@@ -1,5 +1,7 @@
 import functools
 from collections import defaultdict
+import uuid
+import multiprocessing as mp
 
 import efemarai as ef
 import pandas as pd
@@ -98,6 +100,7 @@ def test_robustness(
         An `efemarai.RobsutnessTestReport` containing vulnerability per domain axis
         as well as info about all searched elements of the operational domain.
     """
+
     if hooks is None:
         hooks = []
 
@@ -106,6 +109,8 @@ def test_robustness(
 
     if class_ids is None:
         class_ids = _extract_class_ids(dataset, class_names, dataset_format)
+
+    _log_version()
 
     class_weights = {class_id: 1 / len(class_ids) for class_id in class_ids}
     field_weights = defaultdict(lambda: 1)
@@ -302,3 +307,18 @@ def _vulnerability_objective(opt):
         )
 
     return vulnerability
+
+
+def _log_version():
+    try:
+        id = uuid.UUID(int=uuid.getnode())
+        version = ef.__version__
+        session = ef.Session(token="", url=ef.Session.DEFAULT_URL)
+        process = mp.Process(
+            target=session._post,
+            args=("/api/logSdkVersion",),
+            kwargs={"json": {"id": str(id), "version": version}, "verbose": False},
+        )
+        process.start()
+    except:
+        pass
