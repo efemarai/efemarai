@@ -159,7 +159,6 @@ def test_robustness(
             search_args["baseline_score"] = baseline_score
 
             new_samples = _execute_search(search_args)
-
             if new_samples is not None:
                 new_samples.assign(
                     image=index
@@ -192,7 +191,7 @@ def _extract_class_ids(dataset, class_names, dataset_format):
         class_ids.update([label.id for label in labels if label.id is not None])
         class_names.update([label.name for label in labels if label.name is not None])
 
-    return class_ids or list(range(class_names))
+    return class_ids or list(range(len(class_names)))
 
 
 def _get_search_args(

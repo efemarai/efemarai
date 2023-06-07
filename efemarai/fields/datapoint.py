@@ -18,6 +18,9 @@ class ModelOutput:
     def create_from(spec, datapoint, data, remap_class_ids=None):
         outputs = convert(spec, data)
 
+        if not isinstance(outputs, list):
+            outputs = [outputs]
+
         for output in outputs:
             if remap_class_ids and hasattr(output, "label"):
                 output.label.id = remap_class_ids[output.label.id]
@@ -40,7 +43,6 @@ class Datapoint:
     @staticmethod
     def create_from(spec, data):
         datapoint = Datapoint(dataset=None)
-
         inputs, targets = convert(spec, data)
 
         if not isinstance(inputs, list):
