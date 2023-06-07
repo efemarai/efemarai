@@ -4,6 +4,8 @@ from typing import Dict, List
 
 import numpy as np
 from bson.objectid import ObjectId
+import cv2
+import itertools
 
 
 def _decode_ndarray(xs):
@@ -33,6 +35,35 @@ def _serialize_function(x):
     if isinstance(x, ObjectId):
         return str(x)
     return x.__dict__
+
+def create_polygons_from_mask(mask_img, threshold_value=127):
+    # Get contours as polygons and the area of the polygons
+    _, thresh = cv2.threshold(mask_img, threshold_value, 255, 0)
+    (
+        contours,
+        _,
+    ) = cv2.findContours(  # Format: [[[[x1, y1]], [[x2, y2]]...], ...]
+        thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
+    if not contours:
+        return ([], 0)
+
+    polygons_area = 0
+    polygons = []  # Format: [[x1, y1, x2, y2...], []]
+
+    for contour in contours:
+        # Skip single points and lines
+        if len(contour) < 3:
+            continue
+
+        polygons_area += cv2.contourArea(contour)
+
+        # Get rid of unnecessary levels of nesting
+        points = list(itertools.chain(*contour))  # Format: [[x1, y1], [x2, y2]...]
+
+        polygons.append([[float(coord) for coord in point] for point in points])
+
+    return (polygons, polygons_area)
 
 
 class BaseField:

@@ -1,12 +1,17 @@
 import numpy as np
 from PIL import Image as PIL_Image
 
-from efemarai.fields import AnnotationClass, BoundingBox, Image
+from efemarai.fields import AnnotationClass, BoundingBox, Image, InstanceMask, Polygon
 from efemarai.spec import call, create
 
 
 def tensor_to_numpy(x):
     return x.detach().cpu().numpy()
+
+def mask_to_polygon(mask):
+    polygon = mask.to_polygon()
+    polygon.load_raw_data(mask.width, mask.height)
+    return polygon
 
 
 COCO_INPUT = create(Image, data=np.array, key_name="'image'")
@@ -78,4 +83,33 @@ ROBOFLOW_DETECTION = {
             label=create(AnnotationClass, id="class", confidence="confidence"),
         ),
     ]
+}
+
+COCO_TARGET_INSTANCE = [
+    create(
+        Polygon,
+        vertices="segmentation",
+        label=create(AnnotationClass, id="category_id"),
+    ),
+]
+
+COCO_INSTANCE_DATASET = (COCO_INPUT, COCO_TARGET_INSTANCE)
+
+DETECTRON_INSTANCE_DETECTION = {
+    "._fields": {
+        call(zip, "scores", "pred_classes", "pred_masks"): [
+            call(
+                mask_to_polygon,
+                create(
+                    InstanceMask,
+                    data=call(InstanceMask.bool_to_uint8, {2: tensor_to_numpy}),
+                    label=create(
+                        AnnotationClass,
+                        id={1: tensor_to_numpy},
+                        confidence={0: tensor_to_numpy},
+                    ),
+                ),
+            )
+        ]
+    }
 }

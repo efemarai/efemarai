@@ -35,8 +35,10 @@ INSTANCE_LOSSES = {
 def load_mask(fields):
     base_fields = fields.targets if isinstance(fields, Datapoint) else fields.outputs
     for target in base_fields:
-
         if target._cls == "Polygon":
+            # Skip loading raw data if it is already loaded
+            if target._raw_data is not None:
+                continue
             inputs = (
                 fields.inputs if isinstance(fields, Datapoint) else fields.inputs.inputs
             )
@@ -96,7 +98,6 @@ def update_loss_dict(source_dict, target_dict, weight=1):
 def datapoint_loss(
     datapoint, model_output, class_weights, field_weights, confusion_weights=None
 ):
-
     if confusion_weights is None:
         confusion_weights = defaultdict(lambda: (1 / 3, 1 / 3, 1 / 3))
 
@@ -155,7 +156,6 @@ def datapoint_loss(
             "failure_score_normalization_constant": 0,
         }
         for target_ref in grouped_target_fields[field_type]:
-
             # TODO: Think of a better way to handle this case. Is that the case?
             if target_ref not in grouped_output_fields[field_type]:
                 field_loss["failure_score_unnormalized"] += 1
