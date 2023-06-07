@@ -14,7 +14,10 @@ from efemarai.fields.base_fields import BaseField, sdk_serialize
 def create_polygons_from_mask(mask_img, threshold_value=127):
     # Get contours as polygons and the area of the polygons
     _, thresh = cv2.threshold(mask_img, threshold_value, 255, 0)
-    (contours, _,) = cv2.findContours(  # Format: [[[[x1, y1]], [[x2, y2]]...], ...]
+    (
+        contours,
+        _,
+    ) = cv2.findContours(  # Format: [[[[x1, y1]], [[x2, y2]]...], ...]
         thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
     )
     if not contours:
