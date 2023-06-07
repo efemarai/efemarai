@@ -4,7 +4,12 @@ import numpy as np
 import slugify
 from bson.objectid import ObjectId
 
-from efemarai.fields.base_fields import BaseField, sdk_serialize
+from efemarai.fields.base_fields import (
+    BaseField,
+    sdk_serialize,
+    create_polygons_from_mask,
+)
+import cv2
 
 
 def chunks(lst, n):
@@ -289,6 +294,7 @@ class InstanceField(BaseField):
 class BoundingBox(InstanceField):
     XYWH_ABSOLUTE = 0
     XYXY_ABSOLUTE = 1
+    CENTERWH_ABSOLUTE = 2
 
     @staticmethod
     def convert(box, source_format=None, target_format=None):
@@ -314,6 +320,9 @@ class BoundingBox(InstanceField):
         if source_format == BoundingBox.XYWH_ABSOLUTE:
             x, y, w, h, *rest = box
             return x, y, x + w - 1, y + h - 1, *rest
+        if source_format == BoundingBox.CENTERWH_ABSOLUTE:
+            x, y, w, h, *rest = box
+            return x - w / 2, y - h / 2, x + w / 2 - 1, y + h / 2 - 1, *rest
 
     @staticmethod
     def _convert_from_xyxy_absolute(box, target_format):
@@ -484,6 +493,7 @@ class Polygon(InstanceField):
 
         self.vertices = vertices
         self.area = area
+        self._raw_data = None
 
     def __repr__(self):
         res = f"{self.__module__}.{self.__class__.__name__}("
@@ -495,8 +505,39 @@ class Polygon(InstanceField):
         res += f"\n  confidence={self.confidence}"
         res += f"\n  ref_field={self.ref_field}"
         res += f"\n  key_name={self.key_name}"
+        res += (
+            f"\n  _raw_data={self._raw_data.shape}"
+            if self._raw_data is not None
+            else f"{self._raw_data}"
+        )
         res += "\n)"
         return res
+
+    def load_raw_data(self, width, height):
+        self._raw_data = np.zeros((height, width), np.uint8)
+        cv2.drawContours(
+            self._raw_data,
+            [
+                np.array(contour).reshape((-1, 1, 2)).astype(np.int32)
+                for contour in self.vertices
+            ],
+            contourIdx=-1,
+            color=255,
+            thickness=cv2.FILLED,
+        )
+
+    def get_mask(self, width, height):
+        if self._raw_data is None or self._raw_data.shape[:2] != (height, width):
+            self.load_raw_data(width, height)
+        return self._raw_data
+
+    def set_mask(self, mask):
+        self._raw_data = mask
+
+    def set_vertices(self):
+        polygons, polygons_area = create_polygons_from_mask(self._raw_data)
+        self.vertices = polygons
+        self.area = polygons_area
 
 
 class Keypoint(InstanceField):
@@ -685,6 +726,5 @@ class Skeleton(InstanceField):
 
 class PolarVector:
     def __init__(self, angle: float, length: float):
-
         self.angle = angle
         self.length = length
