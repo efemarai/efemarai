@@ -455,6 +455,7 @@ def prepare_polygon_fields(image, targets):
 
     for mask, field in zip(targets["masks"], targets["polygon_fields"]):
         polygon = Polygon(
+            vertices=[],
             ref_field=[image.id],
             instance_id=field.instance_id,
             label=field.label,

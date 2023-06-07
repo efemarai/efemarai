@@ -1,4 +1,3 @@
-import itertools
 import math
 from typing import Dict
 
@@ -8,37 +7,11 @@ from bson.objectid import ObjectId
 from PIL import Image as pil_image
 
 from efemarai.fields.annotation_fields import AnnotationClass, InstanceField, Polygon
-from efemarai.fields.base_fields import BaseField, sdk_serialize
-
-
-def create_polygons_from_mask(mask_img, threshold_value=127):
-    # Get contours as polygons and the area of the polygons
-    _, thresh = cv2.threshold(mask_img, threshold_value, 255, 0)
-    (
-        contours,
-        _,
-    ) = cv2.findContours(  # Format: [[[[x1, y1]], [[x2, y2]]...], ...]
-        thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
-    if not contours:
-        return ([], 0)
-
-    polygons_area = 0
-    polygons = []  # Format: [[x1, y1, x2, y2...], []]
-
-    for contour in contours:
-        # Skip single points and lines
-        if len(contour) < 3:
-            continue
-
-        polygons_area += cv2.contourArea(contour)
-
-        # Get rid of unnecessary levels of nesting
-        points = list(itertools.chain(*contour))  # Format: [[x1, y1], [x2, y2]...]
-
-        polygons.append([[float(coord) for coord in point] for point in points])
-
-    return (polygons, polygons_area)
+from efemarai.fields.base_fields import (
+    BaseField,
+    sdk_serialize,
+    create_polygons_from_mask,
+)
 
 
 class Image(BaseField):
@@ -284,6 +257,12 @@ class InstanceMask(Image, InstanceField):
             ref_field=self.ref_field,
             key_name=self.key_name,
         )
+
+    @staticmethod
+    def bool_to_uint8(data):
+        if data.dtype != np.uint8:
+            data = data.astype(np.uint8) * 255
+        return data
 
 
 class VideoFrame(Image):
