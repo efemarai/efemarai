@@ -10,7 +10,7 @@ from efemarai.metamorph.base_metamorphs import def_operator, param, siso, Catego
 
 
 @def_operator(category=Category.Text)
-@param("word_synonym_p", float, range=(0, 1), value=0.3, fixed=True)
+@param("word_synonym_p", float, range=(0, 1))
 @siso()
 @apply_nlpaug()
 def WordSynonym(word_synonym_p) -> Callable:
@@ -22,7 +22,7 @@ def WordSynonym(word_synonym_p) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("word_antonym_p", float, range=(0, 1), value=0.3, fixed=True)
+@param("word_antonym_p", float, range=(0, 1))
 @siso()
 @apply_nlpaug()
 def WordAntonym(word_antonym_p) -> Callable:
@@ -34,7 +34,7 @@ def WordAntonym(word_antonym_p) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("word_contextual_embs_p", float, range=(0, 1), value=0.3, fixed=True)
+@param("word_contextual_embs_p", float, range=(0, 1))
 @param(
     "action",
     str,
@@ -49,13 +49,14 @@ def WordContextualEmbs(word_contextual_embs_p, action) -> Callable:
         return lambda text: [text]
 
     aug = naw.ContextualWordEmbsAug(
-        aug_p=word_contextual_embs_p, aug_min=None, aug_max=None, action=action
+        aug_p=word_contextual_embs_p, aug_max=None, action=action
     )
     return aug.augment
 
 
+# TODO: Fix edge cases with action = crop and word_random_p < 0.15
 @def_operator(category=Category.Text)
-@param("word_random_p", float, range=(0, 1), value=0.3, fixed=True)
+@param("word_random_p", float, range=(0, 1))
 @param(
     "action",
     str,
@@ -76,7 +77,7 @@ def WordRandom(word_random_p, action) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("word_spelling_p", float, range=(0, 1), value=0.3, fixed=True)
+@param("word_spelling_p", float, range=(0, 1))
 @siso()
 @apply_nlpaug()
 def WordSpelling(word_spelling_p) -> Callable:
@@ -88,7 +89,7 @@ def WordSpelling(word_spelling_p) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("word_split_p", float, range=(0, 1), value=0.3, fixed=True)
+@param("word_split_p", float, range=(0, 1))
 @siso()
 @apply_nlpaug()
 def WordSplit(word_split_p) -> Callable:
@@ -100,48 +101,10 @@ def WordSplit(word_split_p) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("word_tfidf_p", float, range=(0, 1), value=0.3, fixed=True)
-@param(
-    "action",
-    str,
-    choices=(Action.SUBSTITUTE, Action.INSERT),
-    fixed=True,
-    value=Action.SUBSTITUTE,
-)
+@param("word_back_translation", bool, choices=(False, True), value=True, fixed=True)
 @siso()
 @apply_nlpaug()
-def WordTfIdf(word_tfidf_p, action) -> Callable:
-    if word_tfidf_p == 0:
-        return lambda text: [text]
-
-    aug = naw.TfIdfAug(aug_p=word_tfidf_p, aug_max=None, action=action)
-    return aug.augment
-
-
-@def_operator(category=Category.Text)
-@param("word_embs_p", float, range=(0, 1), value=0.3, fixed=True)
-@param(
-    "action",
-    str,
-    choices=(Action.SUBSTITUTE, Action.INSERT),
-    fixed=True,
-    value=Action.SUBSTITUTE,
-)
-@siso()
-@apply_nlpaug()
-def WordEmbeddings(word_embs_p) -> Callable:
-    if word_embs_p == 0:
-        return lambda text: [text]
-
-    aug = naw.WordEmbsAug(aug_p=word_embs_p, aug_max=None)
-    return aug.augment
-
-
-@def_operator(category=Category.Text)
-@param("word_back_translation", bool, choices=(False, True), fixed=True)
-@siso()
-@apply_nlpaug()
-def WordBackTranslation(word_back_translation: bool) -> Callable:
+def WordBackTranslation(word_back_translation) -> Callable:
     if not word_back_translation:
         return lambda text: [text]
 
@@ -150,20 +113,8 @@ def WordBackTranslation(word_back_translation: bool) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("word_reserved_p", float, range=(0, 1), value=0.3, fixed=True)
-@siso()
-@apply_nlpaug()
-def WordReserved(word_reserved_p) -> Callable:
-    if word_reserved_p == 0:
-        return lambda text: [text]
-
-    aug = naw.ReservedAug(aug_p=word_reserved_p, aug_max=None)
-    return aug.augment
-
-
-@def_operator(category=Category.Text)
-@param("char_keyboard_char_p", float, range=(0, 1), value=0.3, fixed=True)
-@param("char_keyboard_word_p", float, range=(0, 1), value=0.3, fixed=True)
+@param("char_keyboard_char_p", float, range=(0, 1))
+@param("char_keyboard_word_p", float, range=(0, 1))
 @siso()
 @apply_nlpaug()
 def CharKeyboard(char_keyboard_char_p, char_keyboard_word_p) -> Callable:
@@ -180,8 +131,8 @@ def CharKeyboard(char_keyboard_char_p, char_keyboard_word_p) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("char_random_char_p", float, range=(0, 1), value=0.3, fixed=True)
-@param("char_random_word_p", float, range=(0, 1), value=0.3, fixed=True)
+@param("char_random_char_p", float, range=(0, 1))
+@param("char_random_word_p", float, range=(0, 1))
 @siso()
 @apply_nlpaug()
 def CharRandom(char_random_char_p, char_random_word_p) -> Callable:
@@ -198,8 +149,8 @@ def CharRandom(char_random_char_p, char_random_word_p) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("char_ocr_char_p", float, range=(0, 1), value=0.3, fixed=True)
-@param("char_ocr_word_p", float, range=(0, 1), value=0.3, fixed=True)
+@param("char_ocr_char_p", float, range=(0, 1))
+@param("char_ocr_word_p", float, range=(0, 1))
 @siso()
 @apply_nlpaug()
 def CharOcr(char_ocr_char_p, char_ocr_word_p) -> Callable:
@@ -216,7 +167,7 @@ def CharOcr(char_ocr_char_p, char_ocr_word_p) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("sentence_abst_summ", bool, choices=(False, True), fixed=True)
+@param("sentence_abst_summ", bool, choices=(False, True), value=True, fixed=True)
 @siso()
 @apply_nlpaug()
 def SentenceAbstSumm(sentence_abst_summ: bool) -> Callable:
@@ -228,23 +179,11 @@ def SentenceAbstSumm(sentence_abst_summ: bool) -> Callable:
 
 
 @def_operator(category=Category.Text)
-@param("sentence_lambada", bool, choices=(False, True), fixed=True)
+@param("sentence_context_embs", bool, choices=(False, True), value=True, fixed=True)
 @siso()
 @apply_nlpaug()
-def SentenceLambada(sentence_lambada: bool) -> Callable:
-    if not sentence_lambada:
-        return lambda text: [text]
-
-    aug = nas.LambadaAug()
-    return aug.augment
-
-
-@def_operator(category=Category.Text)
-@param("sentence_contextual_word_embs", bool, choices=(False, True), fixed=True)
-@siso()
-@apply_nlpaug()
-def SentenceContextualWordEmbs(sentence_contextual_word_embs: bool) -> Callable:
-    if not sentence_contextual_word_embs:
+def SentenceContextEmbs(sentence_context_embs: bool) -> Callable:
+    if not sentence_context_embs:
         return lambda text: [text]
 
     aug = nas.ContextualWordEmbsForSentenceAug()
