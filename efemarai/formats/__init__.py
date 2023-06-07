@@ -8,6 +8,11 @@ from efemarai.spec import call, create
 def tensor_to_numpy(x):
     return x.detach().cpu().numpy()
 
+def mask_to_polygon(mask):
+    polygon = mask.to_polygon()
+    polygon.load_raw_data(mask.width, mask.height)
+    return polygon
+
 
 COCO_INPUT = create(Image, data=np.array, key_name="'image'")
 
@@ -80,7 +85,6 @@ ROBOFLOW_DETECTION = {
     ]
 }
 
-
 COCO_TARGET_INSTANCE = [
     create(
         Polygon,
@@ -89,15 +93,7 @@ COCO_TARGET_INSTANCE = [
     ),
 ]
 
-
 COCO_INSTANCE_DATASET = (COCO_INPUT, COCO_TARGET_INSTANCE)
-
-
-def mask_to_polygon(mask):
-    polygon = mask.to_polygon()
-    polygon.load_raw_data(mask.width, mask.height)
-    return polygon
-
 
 DETECTRON_INSTANCE_DETECTION = {
     "._fields": {
