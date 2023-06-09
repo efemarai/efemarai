@@ -1,11 +1,11 @@
 import base64
+import itertools
 import json
 from typing import Dict, List
 
+import cv2
 import numpy as np
 from bson.objectid import ObjectId
-import cv2
-import itertools
 
 
 def _decode_ndarray(xs):
@@ -36,13 +36,11 @@ def _serialize_function(x):
         return str(x)
     return x.__dict__
 
+
 def create_polygons_from_mask(mask_img, threshold_value=127):
     # Get contours as polygons and the area of the polygons
     _, thresh = cv2.threshold(mask_img, threshold_value, 255, 0)
-    (
-        contours,
-        _,
-    ) = cv2.findContours(  # Format: [[[[x1, y1]], [[x2, y2]]...], ...]
+    (contours, _,) = cv2.findContours(  # Format: [[[[x1, y1]], [[x2, y2]]...], ...]
         thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
     )
     if not contours:

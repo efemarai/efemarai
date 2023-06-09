@@ -75,11 +75,11 @@ If you work in the medical, aerospace and defence, security or ag domain, we pro
 
 ## Setup
 
-Install with
+Install full version with
 ```bash
-pip install -U efemarai
+pip install -U efemarai[full]
 ```
-then run
+or just base with `pip install -U efemarai`; then run
 ```bash
 efemarai init
 ```

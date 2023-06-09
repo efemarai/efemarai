@@ -9,8 +9,8 @@ from PIL import Image as pil_image
 from efemarai.fields.annotation_fields import AnnotationClass, InstanceField, Polygon
 from efemarai.fields.base_fields import (
     BaseField,
-    sdk_serialize,
     create_polygons_from_mask,
+    sdk_serialize,
 )
 
 

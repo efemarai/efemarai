@@ -1,15 +1,15 @@
 from typing import Dict, List, Tuple
 
+import cv2
 import numpy as np
 import slugify
 from bson.objectid import ObjectId
 
 from efemarai.fields.base_fields import (
     BaseField,
-    sdk_serialize,
     create_polygons_from_mask,
+    sdk_serialize,
 )
-import cv2
 
 
 def chunks(lst, n):

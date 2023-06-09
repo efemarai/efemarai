@@ -6,6 +6,7 @@ from typing import Union
 
 import ffmpeg
 from bson.objectid import ObjectId
+
 from efemarai.console import console
 from efemarai.fields.annotation_fields import InstanceField, Polygon
 from efemarai.fields.base_fields import BaseField
