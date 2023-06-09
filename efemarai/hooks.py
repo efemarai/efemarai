@@ -1,4 +1,4 @@
-from efemarai.fields import BoundingBox, Polygon, InstanceMask
+from efemarai.fields import BoundingBox, InstanceMask, Polygon
 
 
 def show_sample(

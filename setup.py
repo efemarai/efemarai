@@ -17,8 +17,8 @@ def get_version():
         raise RuntimeError("Unable to find version string.")
 
 
-def get_requirements():
-    with open("requirements.txt") as f:
+def get_requirements(file):
+    with open(file) as f:
         requirements = [
             line
             for line in f.read().splitlines()
@@ -48,7 +48,10 @@ setup(
     entry_points={
         "console_scripts": ["efemarai = efemarai.cli:main", "ef = efemarai.cli:main"]
     },
-    install_requires=get_requirements(),
+    install_requires=get_requirements("requirements.txt"),
+    extras_require={
+        "full": get_requirements("requirements_full.txt"),
+    },
     python_requires=">=3.6",
     zip_safe=False,
 )

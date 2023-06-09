@@ -1,18 +1,12 @@
 import functools
-from collections import defaultdict
-import uuid
 import multiprocessing as mp
+import uuid
+from collections import defaultdict
+
+from rich.progress import Progress, track
 
 import efemarai as ef
-import pandas as pd
-from efemarai.metamorph.loss.loss_functions import (
-    aggregate_loss,
-    failure_loss,
-    subtract_losses,
-)
-from hyperactive import Hyperactive
-from hyperactive.optimizers import RepulsingHillClimbingOptimizer
-from rich.progress import Progress, track
+from efemarai.console import console
 
 
 def test_robustness(
@@ -100,6 +94,19 @@ def test_robustness(
         An `efemarai.RobsutnessTestReport` containing vulnerability per domain axis
         as well as info about all searched elements of the operational domain.
     """
+
+    # Check if full version is installed
+    try:
+        import pandas as pd
+
+        from efemarai.metamorph.loss.loss_functions import aggregate_loss, failure_loss
+    except ImportError as e:
+        console.print(
+            "\nPlease install all requirements for the full version of efemarai. Or run:\n"
+            "python -m pip install efemarai\[full]",
+            style="red",
+        )
+        raise e
 
     if hooks is None:
         hooks = []
@@ -234,6 +241,17 @@ def _get_search_args(
 
 
 def _execute_search(args):
+    try:
+        from hyperactive import Hyperactive
+        from hyperactive.optimizers import RepulsingHillClimbingOptimizer
+
+    except ImportError as e:
+        console.print(
+            "\nPlease install all requirements for the full version of efemarai. Or run:\n"
+            "python -m pip install efemarai\[full]",
+            style="red",
+        )
+        raise e
     hyper = Hyperactive(verbosity=False)
     hyper.add_search(
         objective_function=_vulnerability_objective,
@@ -254,6 +272,8 @@ def _execute_search(args):
 
 
 def _vulnerability_objective(opt):
+    from efemarai.metamorph.loss.loss_functions import aggregate_loss, subtract_losses
+
     args = opt.pass_through
 
     input_format = args["input_format"]

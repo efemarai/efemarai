@@ -4,5 +4,4 @@ import efemarai.metamorph.base_metamorphs as base
 import efemarai.metamorph.text.text_metamorphs
 import efemarai.metamorph.vision.vision_metamorphs
 
-
 METAMORPHS = base.METAMORPHS
