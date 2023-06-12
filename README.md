@@ -1,4 +1,3 @@
-
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://uploads-ssl.webflow.com/610aa229ecea935cd9cfb47a/610acaca4091b72c3fd40cf7_efemarai_logo_light-p-500.png#gh-dark-mode-only" width="400">
@@ -23,9 +22,8 @@
 [![PyPI](https://img.shields.io/pypi/v/efemarai)](https://pypi.org/project/efemarai)
 [![license](https://img.shields.io/github/license/efemarai/efemarai.svg)](https://github.com/efemarai/efemarai/blob/main/LICENSE)
 
- An SDK for interacting with the Efemarai ML [testing platform](https://ci.efemarai.com). Make your R&D model production ready.
+An SDK for interacting with the Efemarai ML [testing platform](https://ci.efemarai.com). Make your R&D model production ready.
 
-    
 [📘Documentation](https://ci.efemarai.com/docs) |
 [🛠️Installation](https://ci.efemarai.com/docs/tutorials/getting_started.html#getting-started) |
 [👀Break YOLO](https://breakyolo.efemarai.com/) |
@@ -76,16 +74,111 @@ If you work in the medical, aerospace and defence, security or ag domain, we pro
 ## Setup
 
 Install full version with
-```bash
+```shell
 pip install -U efemarai[full]
 ```
 or just base with `pip install -U efemarai`; then run
-```bash
+```shell
 efemarai init
 ```
 and follow the instructions to connect your account to [https://ci.efemarai.com](https://ci.efemarai.com).
 
-## Example Usage
+## Example Local Usage
+
+### NLP/LLMs
+
+Testing Natural Langugage and LLMs allow you to understand how sensitive is your model embedding to common human input errors like spelling mistakes, synonyms, or plain swapping of names and places. 
+
+Have a look at the examples [here](https://ci.efemarai.com/docs/local/getting_started/bert_squad.html).
+
+#### Test BERT locally
+
+Here is a code example on how to get started testing a BERT model with the SQUAD dataset:
+
+```
+import efemarai as ef
+from datasets import load_dataset, logging as datasets_logging
+from transformers import (
+    AutoTokenizer,
+    BertForQuestionAnswering,
+    logging as transformers_logging,
+)
+
+datasets_logging.set_verbosity_error()
+transformers_logging.set_verbosity_error()
+
+
+def get_model_func(model, tokenizer):
+    def predict(inputs):
+        inputs = tokenizer(inputs["question"], inputs["context"], return_tensors="pt")
+        outputs = model(**inputs)
+
+        start_index = outputs.start_logits.argmax()
+        end_index = outputs.end_logits.argmax()
+        predict_answer_tokens = inputs.input_ids[0, start_index : end_index + 1]
+        result = tokenizer.decode(predict_answer_tokens, skip_special_tokens=True)
+
+        return result
+
+    return predict
+
+
+def main():
+    dataset = load_dataset("squad", split="validation[:10]")
+    dataset = [
+        (
+            {"context": dp["context"], "question": dp["question"]},
+            {"answer": dp["answers"]["text"][0]},
+        )
+        for dp in dataset
+    ]
+
+    tokenizer = AutoTokenizer.from_pretrained("deepset/bert-base-cased-squad2")
+    model = BertForQuestionAnswering.from_pretrained("deepset/bert-base-cased-squad2")
+
+    report = ef.test_robustness(
+        dataset=dataset,
+        model=get_model_func(model, tokenizer),
+        domain=ef.domains.TextVariability,
+        dataset_format=ef.formats.TEXT_EQA_DATASET,
+        output_format=lambda text: ef.Text(text=text),
+        input_format=lambda datapoint: {
+            "context": datapoint.context.text,
+            "question": datapoint.question.text,
+        },
+    )
+
+    report.plot("robustness_report.pdf")
+
+
+if __name__ == "__main__":
+    main()
+```    
+
+### Computer Vision 
+
+We support a large range of integrations with different open source models, as well as a set of pre-defined domains (`ef.domains.GeometricVariability`, `ef.domains.ColorVariability`, `ef.domains.NoiseVariability`) to kickstart your ML testing. 
+
+Here you can find a few tutorials integrating a [`torchvision` model with COCO dataset](https://ci.efemarai.com/docs/local/getting_started/torchvision_coco.html), a [`Detectron2 Mask-RCNN` model with a balloon dataset](https://ci.efemarai.com/docs/local/getting_started/detectron2_instance_balloons.html), a [`YOLO` model](https://ci.efemarai.com/docs/local/getting_started/yolo_ultralytics_coco.html) or a [Roboflow model](https://ci.efemarai.com/docs/local/getting_started/yolo_roboflow_coladetect.html).
+
+The included code examples can start you from zero to one and get insight into the model performance like:
+
+```shell
+    Robustness Test Report    
+┏━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃    Axis    ┃ Vulnerability ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ saturation │    0.2825     │
+│ brightness │    0.2718     │
+│  contrast  │    0.2027     │
+│   value    │    0.2022     │
+│   gamma    │    0.2014     │
+│    hue     │    0.1130     │
+└────────────┴───────────────┘
+✔ Report plot saved as 'robustness_report.pdf'
+```
+
+## Example Hub Usage
 
 ### Create a Bounding Box Project
 When your project depends on bounding boxes, the uploaded dataset needs to contain the required bounding box information alongside each image as part of a single datapoint.
@@ -215,7 +308,7 @@ models:
 #### Register the model
 To register the model, use the CLI to upload it by going into the root of the file directory, next to the `efemarai.yaml`.
 
-```bash
+```shell
 ef model create .
 ```
 Now you should be able to see the model uploaded and active with this project.
