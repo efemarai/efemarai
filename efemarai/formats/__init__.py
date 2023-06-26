@@ -64,6 +64,15 @@ ULTRALYTICS_DETECTION = {
     }
 }
 
+VQA_INPUT = create(
+    lambda *args: list(args),
+    create(Text, text="question", key_name="'question'"),
+    create(Image, data=lambda x: x["image"], key_name="'image'"),
+)
+
+VQA_OUTPUT = create(Text, text="answers", key_name="'answer'")
+VQA_DATASET = (VQA_INPUT, VQA_OUTPUT)
+
 DEFAULT_INPUT_NP_FORMAT = {".image": {".data": np.array}}
 
 SUPERVISION_TARGET = {
