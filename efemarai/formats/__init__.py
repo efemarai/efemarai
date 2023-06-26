@@ -1,12 +1,20 @@
 import numpy as np
 from PIL import Image as PIL_Image
 
-from efemarai.fields import AnnotationClass, BoundingBox, Image, InstanceMask, Polygon, Text
+from efemarai.fields import (
+    AnnotationClass,
+    BoundingBox,
+    Image,
+    InstanceMask,
+    Polygon,
+    Text,
+)
 from efemarai.spec import call, create
 
 
 def tensor_to_numpy(x):
     return x.detach().cpu().numpy()
+
 
 def mask_to_polygon(mask):
     polygon = mask.to_polygon()
@@ -129,6 +137,23 @@ DETECTRON_INSTANCE_DETECTION = {
                     ),
                 ),
             )
+        ]
+    }
+}
+
+
+DETECTRON_OBJECT_DETECTION = {
+    "._fields": {
+        call(zip, "scores", "pred_classes", "pred_boxes"): [
+            create(
+                BoundingBox,
+                xyxy={2: tensor_to_numpy},
+                label=create(
+                    AnnotationClass,
+                    id={1: tensor_to_numpy},
+                    confidence={0: tensor_to_numpy},
+                ),
+            ),
         ]
     }
 }
