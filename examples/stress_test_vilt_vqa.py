@@ -61,7 +61,7 @@ def main():
     report = ef.test_robustness(
         dataset=dataset,
         model=model_func,
-        domain=ef.domains.TextVariability,
+        domain=ef.domains.TextVariability,  # ef.domains.TextGPTVariability
         dataset_format=ef.formats.VQA_DATASET,
         output_format=lambda text: ef.Text(text=text),
         input_format=lambda datapoint: {

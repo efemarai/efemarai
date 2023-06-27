@@ -47,6 +47,8 @@ class RobustnessTestReport:
             sharey=True,
         )
 
+        if not isinstance(axs, np.ndarray):
+            axs = np.array([axs])
         axs[0].set_ylabel("Vulnerability")
 
         for param, ax in zip(params, axs):
