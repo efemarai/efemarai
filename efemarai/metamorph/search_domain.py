@@ -159,6 +159,7 @@ def test_robustness(
 
             output = model(input)
 
+            search_args["output"] = output
             output = ef.ModelOutput.create_from(
                 output_format, datapoint, output, remap_class_ids=remap_class_ids
             )
@@ -172,6 +173,8 @@ def test_robustness(
 
             new_samples = _execute_search(search_args)
             if new_samples is not None:
+                new_samples["baseline_score"] = [baseline_score] * len(new_samples)
+                new_samples["sample_score"] = new_samples["score"] + baseline_score
                 new_samples.assign(
                     image=index
                     if dataset_index_to_id is None
@@ -313,6 +316,7 @@ def _vulnerability_objective(opt):
     )
 
     sample_loss = loss_fn(datapoint, output)
+    sample_score = aggregate_loss(sample_loss)
 
     vulnerability = aggregate_loss(subtract_losses(sample_loss, baseline_loss))
 
@@ -324,6 +328,8 @@ def _vulnerability_objective(opt):
             baseline_loss,
             sample_loss,
             vulnerability,
+            args["baseline_score"],
+            sample_score,
         )
 
     return vulnerability

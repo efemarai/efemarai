@@ -6,40 +6,55 @@ from efemarai.console import console
 
 class RobustnessTestReport:
     @staticmethod
-    def calculate_vulnerability(samples):
-        vulnerability = {}
+    def calculate_scores(samples):
+        scores = {}
 
         params = samples.columns.tolist()
+        params.remove("baseline_score")
+        params.remove("sample_score")
         params.remove("score")
         params.remove("image")
 
         for param in params:
-            vulnerability[param] = samples.groupby(param)["score"].mean().mean()
+            scores[param] = {
+                "baseline_score": samples.groupby(param)["baseline_score"]
+                .mean()
+                .mean(),
+                "sample_score": samples.groupby(param)["sample_score"].mean().mean(),
+                "vulnerability": samples.groupby(param)["score"].mean().mean(),
+            }
 
-        return vulnerability
+        return scores
 
     def __init__(self, samples):
         self.samples = samples
-        self.vulnerability = self.calculate_vulnerability(samples)
+        self.scores = self.calculate_scores(samples)
 
     def print_vulnerability(self):
         table = Table(title="Robustness Test Report")
         table.add_column("Axis", justify="center")
+        table.add_column("Original Failure", justify="center")
+        table.add_column("Generated Failure", justify="center")
         table.add_column("Vulnerability", justify="center")
 
-        for param, sensitivity in sorted(
-            self.vulnerability.items(),
-            key=lambda item: -item[1],
+        for param, scores_dict in sorted(
+            self.scores.items(),
+            key=lambda item: -item[1]["vulnerability"],
         ):
-            table.add_row(param, f"{sensitivity:.4f}")
+            table.add_row(
+                param,
+                f"{scores_dict['baseline_score']:.4f}",
+                f"{scores_dict['sample_score']:.4f}",
+                f"{scores_dict['vulnerability']:.4f}",
+            )
 
         console.print(table)
 
     def plot(self, filename=None):
         import matplotlib.pyplot as plt
 
-        params = list(self.vulnerability.keys())
-        params.sort(key=lambda param: -self.vulnerability[param])
+        params = list(self.scores.keys())
+        params.sort(key=lambda param: -self.scores[param]["vulnerability"])
 
         fig, axs = plt.subplots(
             nrows=len(params),
@@ -47,6 +62,8 @@ class RobustnessTestReport:
             sharey=True,
         )
 
+        if not isinstance(axs, np.ndarray):
+            axs = np.array([axs])
         axs[0].set_ylabel("Vulnerability")
 
         for param, ax in zip(params, axs):
@@ -64,7 +81,7 @@ class RobustnessTestReport:
             )
             ax.set_xticks(ticks)
             ax.tick_params(axis="x", labelrotation=90)
-            ax.set_title(f"{param}: {self.vulnerability[param]:.4f}")
+            ax.set_title(f"{param}: {self.scores[param]['vulnerability']:.4f}")
 
             for name in ("cbars", "cmins", "cmaxes", "cmeans"):  # "cmedians",
                 elements[name].set_edgecolor("#00a9ff")
