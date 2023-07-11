@@ -1,0 +1,67 @@
+domains:
+
+
+- name: Text
+  transformations:
+
+  - name: ChooseImage
+    operator: ChooseImage
+    axes:
+
+    - name: dataset
+      type: str
+      range: []
+      choices: []
+      fixed: true
+      value: ''
+
+    - name: classes
+      type: list
+      range: []
+      choices: []
+      fixed: true
+      value: []
+    inputs: []
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: Gpt
+        index: 0
+    position:
+      x: -126
+      "y": -12
+
+  - name: EvaluateSample
+    operator: EvaluateSample
+    axes: []
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: Gpt
+        index: 0
+    outputs: []
+    position:
+      x: 772
+      "y": -22
+
+  - name: Gpt
+    operator: Gpt
+    axes:
+    - name: gpt
+      type: bool
+      range: []
+      choices: [false, true]
+      fixed: false
+    inputs:
+    - type: Datapoint
+      output_from:
+        transformation: ChooseImage
+        index: 0
+    outputs:
+    - type: Datapoint
+      input_to:
+      - transformation: EvaluateSample
+        index: 0
+    position:
+      x: 509
+      "y": -29
