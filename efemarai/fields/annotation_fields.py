@@ -394,6 +394,14 @@ class BoundingBox(InstanceField):
         return res
 
     @property
+    def cx(self):
+        return (self.xyxy[2] + self.xyxy[0]) / 2
+
+    @property
+    def cy(self):
+        return (self.xyxy[3] + self.xyxy[1]) / 2
+
+    @property
     def width(self):
         return self.xyxy[2] - self.xyxy[0] + 1
 

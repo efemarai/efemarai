@@ -286,7 +286,7 @@ class Dataset:
 
     def __get_data(self, skip, limit):
         response = self.project._post(
-            "api/datapointsIter",
+            "api/datasetIter",
             json={
                 "datasetId": self.id,
                 "skip": skip,
@@ -373,7 +373,7 @@ class Dataset:
 
         return annotations[0]
 
-    def finalize(self, min_asset_area=15, mask_generation=None):
+    def finalize(self, min_asset_area=15, mask_generation=None, wait=False):
         self.project._put(
             f"api/dataset/{self.id}/finalize",
             json={
@@ -385,6 +385,9 @@ class Dataset:
             },
         )
         self.reload()
+
+        if wait:
+            self.project.wait_for(self)
 
         return self
 

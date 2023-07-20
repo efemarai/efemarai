@@ -55,6 +55,21 @@ class Project:
         )
         return Project(session, response["id"], name, description, problem_type)
 
+    @staticmethod
+    def wait_for(item, poll_period=5):
+        """Wait for item (dataset upload, baseline run, stress test run) to be completed."""
+        with console.status(f"Processing '{item.name}'...", spinner_style="green"):
+            while item.reload().running:
+                sleep(poll_period)
+
+        if item.failed:
+            console.print(
+                f":poop: Failed: \n {item} {item.state_message}",
+                style="red",
+            )
+
+        return item
+
     def __init__(self, session, id, name, description, problem_type):
         self._session = session
         self.id = id
@@ -279,6 +294,12 @@ class Project:
             if exists_ok:
                 return existing_dataset
             raise ValueError(f"Dataset {name} already exists and exists_ok=False.")
+
+        if stage.startswith("val"):
+            stage = "validation"
+
+        if format is None:
+            format = DatasetFormat.Custom
 
         if isinstance(format, str):
             format = DatasetFormat(format)

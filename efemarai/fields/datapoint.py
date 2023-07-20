@@ -329,7 +329,7 @@ class Datapoint:
 
     def get_input_refs(self, ids):
         """
-        Returns a list of field in input that refer to id.
+        Returns a list of input fields that refer to id.
 
         Args:
             ids (List[ObjectId]): Ids when referenced to return object, or [] if not found.

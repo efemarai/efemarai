@@ -5,6 +5,7 @@ import re
 from appdirs import user_data_dir
 
 from efemarai.console import console
+from efemarai.dataset import Dataset
 from efemarai.job_state import JobState
 from efemarai.model import Model
 
@@ -35,6 +36,16 @@ class StressTest:
         project = ef.Session().project("Name")
         test = project.stress_test("Test Name")
         test.download_reports()
+
+    Example (3):
+
+    .. code-block:: python
+
+        import efemarai as ef
+        project = ef.Session().project("Name")
+        test = project.stress_test("Test Name")
+        for datapoint in test:
+            print(datapoint)
     """
 
     @staticmethod
@@ -84,7 +95,17 @@ class StressTest:
         )
 
     def __init__(
-        self, project, id, name, model, domain, dataset, state, state_message, reports
+        self,
+        project,
+        id,
+        name,
+        model,
+        domain,
+        dataset,
+        state,
+        state_message,
+        reports,
+        count=None,
     ):
         self.project = (
             project  #: (:class:`efemarai.project.Project`) Associated project.
@@ -128,6 +149,7 @@ class StressTest:
         )
 
         self._reports = reports
+        self.count = count
 
     def __repr__(self):
         res = f"{self.__module__}.{self.__class__.__name__}("
@@ -141,6 +163,49 @@ class StressTest:
         res += f"\n  len(reports)={len(self.reports)}"
         res += "\n)"
         return res
+
+    def __get_data(self, skip, limit, min_score=-1):
+        response = self.project._post(
+            "api/testRunIter",
+            json={
+                "testRunId": self.id,
+                "skip": skip,
+                "limit": limit,
+                "minScore": min_score,
+            },
+        )
+
+        datapoints = []
+        for data in response["objects"]:
+            datapoint = Dataset.deserialize_datapoint(data)
+            datapoints.append(datapoint)
+
+        return datapoints, response["count"]
+
+    def __len__(self):
+        if self.count is None:
+            _, datapoints_count = self.__get_data(skip=0, limit=1)
+            self.count = datapoints_count
+
+        return self.count
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            # Note: Currently ignoring the step in the slice
+            start = key.start if key.start is not None else 0
+            stop = key.stop if key.stop is not None else len(self)
+            datapoints, _ = self.__get_data(skip=start, limit=stop - start)
+            return datapoints
+        if isinstance(key, int):
+            if key < 0:  # Handle negative indices
+                key += len(self)
+            if key < 0 or key >= len(self):
+                raise IndexError(
+                    f"The index ({key}) is out of range (size: {len(self)})."
+                )
+            datapoints, _ = self.__get_data(skip=key, limit=1)
+            return datapoints[0]
+        raise TypeError(f"Invalid argument type ({type(key)}).")
 
     @property
     def reports(self):
