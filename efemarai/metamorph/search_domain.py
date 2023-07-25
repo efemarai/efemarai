@@ -103,7 +103,7 @@ def test_robustness(
     except ImportError as e:
         console.print(
             "\nPlease install all requirements for the full version of efemarai. Or run:\n"
-            "python -m pip install efemarai\[full]",
+            r"python -m pip install efemarai\[full]",
             style="red",
         )
         raise e
@@ -251,7 +251,7 @@ def _execute_search(args):
     except ImportError as e:
         console.print(
             "\nPlease install all requirements for the full version of efemarai. Or run:\n"
-            "python -m pip install efemarai\[full]",
+            r"python -m pip install efemarai\[full]",
             style="red",
         )
         raise e
@@ -346,5 +346,5 @@ def _log_version():
             kwargs={"json": {"id": str(id), "version": version}, "verbose": False},
         )
         process.start()
-    except:
+    except Exception:
         pass
