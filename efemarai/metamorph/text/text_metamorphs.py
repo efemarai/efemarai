@@ -1,3 +1,5 @@
+import openai
+import os
 from collections.abc import Callable
 
 from efemarai.metamorph.adaptors import apply_nlpaug
@@ -187,4 +189,33 @@ def SentenceContextEmbs(sentence_context_embs: bool) -> Callable:
         return lambda text: [text]
 
     aug = nas.ContextualWordEmbsForSentenceAug()
+
     return aug.augment
+
+
+@def_operator(category=Category.Text)
+@param("gpt", bool, choices=(False, True))
+@siso()
+@apply_nlpaug()
+def Gpt(gpt: bool) -> Callable:
+    if not gpt:
+        return lambda text: [text]
+
+    openai.api_key = os.environ["GPT_API_KEY"]
+
+    def call_gpt(text):
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "user",
+                    "content": f'You have the task to generate augmentation of a sentence that would have the same meaning. The sentence is: "{text}" Strip any pre-text and reply only with the permuted sentence.',
+                }
+            ],
+        )
+
+        result = response.choices[0].message.content
+        result = result.replace('"', "")
+        return [result]
+
+    return call_gpt

@@ -17,6 +17,7 @@ try:
     ColorVariability = load(os.path.dirname(__file__) + "/color.yaml")
     NoiseVariability = load(os.path.dirname(__file__) + "/noise.yaml")
     TextVariability = load(os.path.dirname(__file__) + "/text.yaml")
+    TextGPTVariability = load(os.path.dirname(__file__) + "/text_gpt.yaml")
 
 except ImportError:
     pass
